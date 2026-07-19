@@ -64,10 +64,10 @@ When `BOARD != custom`, hardware knobs are pre-filled. Individual inputs overrid
 | Board | FLASH_SIZE | KVMAIN | LED | Other |
 |---|---|---|---|---|
 | `waveshare-rp2350-one` | 4M | — | ws2812, GPIO16, rgb | — |
-| `seeed-xiao-rp2350` | 4M | 896K | ws2812, GPIO22, grb, power=23 | USR_LED=25 |
+| `seeed-xiao-rp2350` | 2M | 896K | ws2812, GPIO22, grb, power=23 | USR_LED=25 |
 | `pimoroni-tiny-2350` | 8M | — | pimoroni | — |
-| `waveshare-rp2350-zero-cm` | 2M | 896K | ws2812, GPIO16, rgb | — |
-| `tenstar-rp2350-usb` | 4M | — | ws2812, GPIO16, grb | — |
+| `waveshare-rp2350-zero-cm` | 2M | 896K | ws2812, GPIO16?, rgb? | — |
+| `tenstar-rp2350-usb` | 16M | — | ws2812, GPIO22, grb | — |
 | `waveshare-rp2350-touch-lcd-2-8` | 16M | — | none | display feature |
 | `custom` | (manual) | (manual) | (manual) | — |
 

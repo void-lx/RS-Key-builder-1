@@ -199,7 +199,7 @@ jobs:
               echo "LED_ORDER=rgb"    >> "$GITHUB_ENV"
               ;;
             seeed-xiao-rp2350)
-              echo "FLASH_SIZE=4M"     >> "$GITHUB_ENV"
+              echo "FLASH_SIZE=2M"     >> "$GITHUB_ENV"
               echo "KVMAIN=896K"       >> "$GITHUB_ENV"
               echo "LED_KIND=ws2812"   >> "$GITHUB_ENV"
               echo "LED_PIN=22"        >> "$GITHUB_ENV"
@@ -212,6 +212,7 @@ jobs:
               echo "LED_KIND=pimoroni" >> "$GITHUB_ENV"
               ;;
             waveshare-rp2350-zero-cm)
+              # LED GPIO not documented upstream — default GPIO16, rgb is a guess
               echo "FLASH_SIZE=2M"     >> "$GITHUB_ENV"
               echo "KVMAIN=896K"       >> "$GITHUB_ENV"
               echo "LED_KIND=ws2812"   >> "$GITHUB_ENV"
@@ -219,9 +220,9 @@ jobs:
               echo "LED_ORDER=rgb"     >> "$GITHUB_ENV"
               ;;
             tenstar-rp2350-usb)
-              echo "FLASH_SIZE=4M"     >> "$GITHUB_ENV"
+              echo "FLASH_SIZE=16M"    >> "$GITHUB_ENV"
               echo "LED_KIND=ws2812"   >> "$GITHUB_ENV"
-              echo "LED_PIN=16"        >> "$GITHUB_ENV"
+              echo "LED_PIN=22"        >> "$GITHUB_ENV"
               echo "LED_ORDER=grb"     >> "$GITHUB_ENV"
               ;;
             waveshare-rp2350-touch-lcd-2-8)
