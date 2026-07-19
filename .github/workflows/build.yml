@@ -263,6 +263,10 @@ jobs:
             done
           fi
 
+      - name: Verify environment in nix shell
+        run: |
+          nix develop -c bash -c 'echo "=== Environment inside nix develop ===" && env | sort'
+
       - name: Build firmware
         run: |
           features="${{ inputs.FEATURES }}"
