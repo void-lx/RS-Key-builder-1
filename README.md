@@ -43,3 +43,44 @@ picotool load -v firmware.uf2 && picotool reboot
 Or copy `firmware.uf2` to the mounted `RP2350` volume.
 
 Quick start guide: https://github.com/TheMaxMur/RS-Key/blob/main/docs/quickstart.md
+
+## Secure boot (optional)
+
+If you add a signing key as a `FIRMWARE_SIGNING_KEY` repository secret, the workflow will
+produce two additional assets in the Release:
+
+- `firmware-sealed.uf2` — firmware signed with your key.
+- `otp_secureboot.json` — OTP boot-key fingerprint for fuse provisioning.
+
+### Generate a signing key
+
+The key must be a **secp256k1 ECDSA private key** in PEM format. Generate one with:
+
+```
+openssl ecparam -genkey -name secp256k1 -out firmware-key.pem
+```
+
+> [!IMPORTANT]
+> This key is the root of trust for your device. Once fused into OTP, a different key
+> cannot be used. Keep it secret, back it up, and never commit it.
+
+### Add the secret
+
+1. In your repo: **Settings → Secrets and variables → Actions → New repository secret**.
+2. Name: `FIRMWARE_SIGNING_KEY`
+3. Paste the full contents of `firmware-key.pem` (including `-----BEGIN EC PRIVATE KEY-----`
+   and `-----END EC PRIVATE KEY-----` lines).
+4. Save.
+
+### Enable secure boot on the board
+
+The Release notes will contain these steps when a sealed build is produced, but in summary:
+
+```
+picotool set_boot_key otp_secureboot.json
+picotool secure_boot
+```
+
+Then flash `firmware-sealed.uf2` via BOOTSEL as usual. These steps are **irreversible**.
+Read the full guide before proceeding:
+https://github.com/TheMaxMur/RS-Key/blob/main/docs/production.md

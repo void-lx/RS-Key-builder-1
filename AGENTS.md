@@ -79,6 +79,19 @@ When `BOARD != custom`, hardware knobs are pre-filled. Individual inputs overrid
 - **Release is the delivery channel** — the UF2 must end up in a GitHub Release so the user
   can download it before deleting the repo.
 
+## Secure boot sealing
+
+When the `FIRMWARE_SIGNING_KEY` secret exists, the workflow:
+
+1. Writes it to `/tmp/secure_boot_key.pem`
+2. Runs `picotool seal --sign --hash firmware.uf2 firmware-sealed.uf2 /tmp/secure_boot_key.pem otp_secureboot.json --major 1 --minor 0`
+3. Uploads `firmware-sealed.uf2` + `otp_secureboot.json` as both workflow artifacts and Release assets
+4. Appends secure-boot OTP flashing instructions to the Release notes
+
+The signing key is a secp256k1 ECDSA private key in PEM format. Key is never exposed in logs.
+Zero new `workflow_dispatch` inputs are added for sealing — `--major 1 --minor 0` is hardcoded,
+`--rollback` omitted (available via manual workflow edit if needed).
+
 ## Upstream docs reference
 
 - Full build knobs: https://github.com/TheMaxMur/RS-Key/blob/main/docs/build.md

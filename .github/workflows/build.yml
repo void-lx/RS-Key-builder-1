@@ -284,6 +284,35 @@ jobs:
           name: firmware
           path: firmware.uf2
 
+      - name: Check for signing key
+        id: check-key
+        env:
+          SIGNING_KEY: ${{ secrets.FIRMWARE_SIGNING_KEY }}
+        run: |
+          if [ -n "$SIGNING_KEY" ]; then
+            echo "$SIGNING_KEY" > /tmp/secure_boot_key.pem
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Signing key found — will seal firmware"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No signing key — skipping seal"
+          fi
+
+      - name: Seal firmware
+        if: steps.check-key.outputs.exists == 'true'
+        run: |
+          nix develop -c picotool seal --sign --hash firmware.uf2 firmware-sealed.uf2 \
+            /tmp/secure_boot_key.pem otp_secureboot.json --major 1 --minor 0
+          sha256sum firmware-sealed.uf2
+
+      - if: steps.check-key.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-sealed
+          path: |
+            firmware-sealed.uf2
+            otp_secureboot.json
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -294,19 +323,40 @@ jobs:
           features="${{ inputs.FEATURES }}"
           [ -z "$features" ] && features="(default)"
 
-          extras="${{ inputs.ENV_EXTRA }}"
-          [ -z "$extras" ] && extras="(none)"
+          assets="firmware.uf2"
+
+          {
+            echo "Built from [TheMaxMur/RS-Key](https://github.com/TheMaxMur/RS-Key) @ $REF"
+            echo ""
+            echo "Board: ${{ inputs.BOARD }}"
+            echo "VIDPID: ${{ inputs.VIDPID }}"
+            echo "FW_VERSION: ${{ inputs.FW_VERSION }}"
+            echo "Features: $features"
+            echo ""
+            echo "Flash via BOOTSEL mode: \`picotool load -v firmware.uf2\` or drag-and-drop."
+          } > /tmp/release-notes.md
+
+          if [ -f firmware-sealed.uf2 ]; then
+            assets="$assets firmware-sealed.uf2 otp_secureboot.json"
+            {
+              echo ""
+              echo "---"
+              echo ""
+              echo "### Secure boot"
+              echo "firmware-sealed.uf2 — signed with your signing key."
+              echo "otp_secureboot.json — OTP boot-key fingerprint for fuse provisioning."
+              echo ""
+              echo "To enable secure boot on your RP2350 board:"
+              echo "1. Load the boot key: \`picotool set_boot_key otp_secureboot.json\`"
+              echo "2. Enable secure boot: \`picotool secure_boot\`"
+              echo ""
+              echo "These steps are **IRREVERSIBLE**. Read the full guide before proceeding:"
+              echo "https://github.com/TheMaxMur/RS-Key/blob/main/docs/production.md"
+            } >> /tmp/release-notes.md
+          fi
 
           gh release create "$tag" \
             --repo "${{ github.repository }}" \
             --title "RS-Key firmware $tag" \
-            --notes "Built from [TheMaxMur/RS-Key](https://github.com/TheMaxMur/RS-Key) @ $REF
-
-            Board: ${{ inputs.BOARD }}
-            VIDPID: ${{ inputs.VIDPID }}
-            FW_VERSION: ${{ inputs.FW_VERSION }}
-            Features: $features
-            ENV_EXTRA: $extras
-
-            Flash via BOOTSEL mode: \`picotool load -v firmware.uf2\` or drag-and-drop." \
-            firmware.uf2
+            --notes-file /tmp/release-notes.md \
+            $assets
