@@ -5,16 +5,16 @@ Build [RS-Key](https://github.com/TheMaxMur/RS-Key) firmware — no local toolch
 ## Usage
 
 1. **Create a repo** from this template (green "Use this template" button).
-2. **Enable GitHub Actions** in your new repo (Settings → Actions → Allow all actions).
-3. **Trigger a build** — go to Actions → "Build RS-Key firmware" → "Run workflow".
+1. **Enable GitHub Actions** in your new repo (Settings → Actions → Allow all actions).
+1. **Trigger a build** — go to Actions → "Build RS-Key firmware" → "Run workflow".
    Fill in the build parameters.
-4. **Download** the resulting `firmware.uf2` from the created GitHub Release.
-5. **Flash** your RP2350 board:
+1. **Download** the resulting `firmware.uf2` from the created GitHub Release.
+1. **Flash** your RP2350 board:
    ```
    picotool load -v firmware.uf2 && picotool reboot
    ```
    Or hold BOOTSEL, plug in, and drag-and-drop the UF2 onto the `RP2350` volume.
-6. **Delete the repo** — it served its purpose.
+1. **Delete the repo** — it served its purpose.
 
 ## Build inputs
 
@@ -60,6 +60,19 @@ The key must be a **secp256k1 ECDSA private key** in PEM format. Generate one wi
 openssl ecparam -genkey -name secp256k1 -out firmware-key.pem
 ```
 
+You will get something like this:
+
+```
+-----BEGIN EC PARAMETERS-----
+BgUrgQQACg==
+-----END EC PARAMETERS-----
+-----BEGIN EC PRIVATE KEY-----
+MHQCAQEEIIlVz0CBAqFi67SRLLkDpYkGnagKBAa1U/PrcLQQxf8yoAcGBSuBBAAK
+oUQDQgAE4bkPcXvOx71UZgRV7NA14+IIIRW95Yxwx6BoG//qPtkG26Yfk9TITX4V
+OZ+xoIjoPLrDT/RinJHvJoZPnHao7Q==
+-----END EC PRIVATE KEY-----
+```
+
 > [!IMPORTANT]
 > This key is the root of trust for your device. Once fused into OTP, a different key
 > cannot be used. Keep it secret, back it up, and never commit it.
@@ -67,20 +80,16 @@ openssl ecparam -genkey -name secp256k1 -out firmware-key.pem
 ### Add the secret
 
 1. In your repo: **Settings → Secrets and variables → Actions → New repository secret**.
-2. Name: `FIRMWARE_SIGNING_KEY`
-3. Paste the full contents of `firmware-key.pem` (including `-----BEGIN EC PRIVATE KEY-----`
+1. Name: `FIRMWARE_SIGNING_KEY`
+1. Paste the full contents of `firmware-key.pem` (including `-----BEGIN EC PRIVATE KEY-----`
    and `-----END EC PRIVATE KEY-----` lines).
-4. Save.
+1. Save.
 
 ### Enable secure boot on the board
 
-The Release notes will contain these steps when a sealed build is produced, but in summary:
+Flash `firmware-sealed.uf2` via BOOTSEL as usual, then follow the upstream production guide
+which covers OTP provisioning and verification:
 
-```
-picotool set_boot_key otp_secureboot.json
-picotool secure_boot
-```
-
-Then flash `firmware-sealed.uf2` via BOOTSEL as usual. These steps are **irreversible**.
-Read the full guide before proceeding:
 https://github.com/TheMaxMur/RS-Key/blob/main/docs/production.md
+
+Secure boot is **irreversible** once OTP fuses are set.

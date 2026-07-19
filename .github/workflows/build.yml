@@ -342,16 +342,12 @@ jobs:
               echo ""
               echo "---"
               echo ""
-              echo "### Secure boot"
-              echo "firmware-sealed.uf2 — signed with your signing key."
-              echo "otp_secureboot.json — OTP boot-key fingerprint for fuse provisioning."
-              echo ""
-              echo "To enable secure boot on your RP2350 board:"
-              echo "1. Load the boot key: \`picotool set_boot_key otp_secureboot.json\`"
-              echo "2. Enable secure boot: \`picotool secure_boot\`"
-              echo ""
-              echo "These steps are **IRREVERSIBLE**. Read the full guide before proceeding:"
-              echo "https://github.com/TheMaxMur/RS-Key/blob/main/docs/production.md"
+          echo "### Secure boot"
+          echo "firmware-sealed.uf2 — signed with your signing key."
+          echo "otp_secureboot.json — OTP boot-key fingerprint for fuse provisioning."
+          echo ""
+          echo "Secure boot setup is **irreversible**. Follow the upstream production guide:"
+          echo "https://github.com/TheMaxMur/RS-Key/blob/main/docs/production.md"
             } >> /tmp/release-notes.md
           fi
 
