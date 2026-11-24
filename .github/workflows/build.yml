@@ -146,7 +146,7 @@ on:
       FEATURES:
         description: 'Cargo features, comma-separated (e.g. no-touch,display,fips-profile)'
         type: string
-        default: ''
+        default: 'no-touch'
         required: false
 
 jobs:
